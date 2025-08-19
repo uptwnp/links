@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Copy,
   Check,
+  X,
 } from "lucide-react";
 import { LinkManager } from "./components/LinkManager";
 import { AddLinkModal } from "./components/AddLinkModal";
