@@ -456,34 +456,43 @@ function App() {
 
         {/* Folders Section */}
         {showFolders && (
-          <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm max-w-7xl mx-auto">
-            <div className="p-4 border-b border-gray-100">
+          <div className="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 shadow-sm max-w-7xl mx-auto">
+            <div className="px-3 py-2 border-b border-blue-100">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">Folders</h2>
+                <div className="flex items-center space-x-1.5">
+                  <Folder className="w-4 h-4 text-blue-600" />
+                  <h2 className="text-sm font-medium text-gray-900">Folders</h2>
+                  <span className="text-xs text-gray-500">
+                    ({folders.length})
+                  </span>
+                </div>
                 <button
                   onClick={() => {
                     const name = prompt("Enter folder name:");
                     if (name) handleAddFolder(name);
                   }}
-                  className="text-blue-600 hover:text-blue-700 transition-colors"
+                  className="p-1 text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded transition-colors"
+                  title="Add new folder"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            <div className="p-4">
-              <div className="flex flex-wrap gap-2">
+            <div className="px-3 py-2">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                 <button
                   onClick={() => setSelectedFolder("")}
                   className={cn(
-                    "px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border",
+                    "flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors border shadow-sm",
                     selectedFolder === ""
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300"
+                      ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                      : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300 hover:shadow-md"
                   )}
                 >
-                  All Links ({links.length})
+                  <span className="whitespace-nowrap">
+                    All ({links.length})
+                  </span>
                 </button>
 
                 {folders.map((folder) => (
@@ -491,18 +500,18 @@ function App() {
                     key={folder.id}
                     onClick={() => setSelectedFolder(folder.id)}
                     className={cn(
-                      "px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border flex items-center space-x-1 sm:space-x-2",
+                      "flex-shrink-0 px-3 py-1.5 rounded-md text-xs font-medium transition-colors border flex items-center space-x-1.5 shadow-sm",
                       selectedFolder === folder.id
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300"
+                        ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300 hover:shadow-md"
                     )}
                   >
                     <div
-                      className="w-3 h-3 rounded-full"
+                      className="w-2 h-2 rounded-full flex-shrink-0"
                       style={{ backgroundColor: folder.color }}
                     />
-                    <span>{folder.name}</span>
-                    <span className="text-xs opacity-75">
+                    <span className="whitespace-nowrap">{folder.name}</span>
+                    <span className="text-xs opacity-75 whitespace-nowrap ml-1">
                       ({links.filter((l) => l.folderId === folder.id).length})
                     </span>
                   </button>
@@ -514,12 +523,16 @@ function App() {
 
         {/* Tags Section */}
         {showTags && (
-          <div className="mb-6 bg-white rounded-xl border border-gray-200 shadow-sm max-w-7xl mx-auto">
-            <div className="p-4 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">Tags</h2>
+          <div className="mb-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 shadow-sm max-w-7xl mx-auto">
+            <div className="px-3 py-2 border-b border-green-100">
+              <div className="flex items-center space-x-1.5">
+                <Tag className="w-4 h-4 text-green-600" />
+                <h2 className="text-sm font-medium text-gray-900">Tags</h2>
+                <span className="text-xs text-gray-500">({tags.length})</span>
+              </div>
             </div>
-            <div className="p-4">
-              <div className="flex flex-wrap gap-2">
+            <div className="px-3 py-2">
+              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
                 {tags.map((tag) => (
                   <button
                     key={tag.id}
@@ -531,13 +544,13 @@ function App() {
                       );
                     }}
                     className={cn(
-                      "px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm border transition-colors",
+                      "flex-shrink-0 px-2.5 py-1 rounded-full text-xs border transition-colors shadow-sm",
                       selectedTags.includes(tag.name)
-                        ? "bg-green-600 text-white border-green-600"
-                        : "bg-white text-gray-700 border-gray-300 hover:bg-green-50 hover:border-green-300"
+                        ? "bg-green-600 text-white border-green-600 shadow-md"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-green-50 hover:border-green-300 hover:shadow-md"
                     )}
                   >
-                    {tag.name}
+                    <span className="whitespace-nowrap">{tag.name}</span>
                   </button>
                 ))}
               </div>
