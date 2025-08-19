@@ -1,101 +1,106 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#3B82F6" />
-    <meta name="description" content="A beautiful, offline-capable link manager for organizing your bookmarks" />
-    <meta name="version" content="1.0.1" />
-    <title>LinkVault</title>
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/favicon.svg?v=1.0.1" />
-    <style>
-      .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #111827;
-          color: #ffffff;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?v=1.0.1')
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-              
-              // Force update if new version available
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                if (newWorker) {
-                  newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                      // New version available, refresh the page
-                      if (confirm('A new version is available. Refresh to update?')) {
-                        window.location.reload();
-                      }
-                    }
-                  });
-                }
-              });
 
-              // Register for background sync when online
-              if ('sync' in window.ServiceWorkerRegistration.prototype) {
-                window.addEventListener('online', () => {
-                  registration.sync.register('background-sync-links');
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#3B82F6" />
+  <meta name="description" content="A beautiful, offline-capable link manager for organizing your bookmarks" />
+  <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+  <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
+  <meta name="version" content="1.0.1" />
+  <title>LinkVault</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/favicon.svg?v=1.0.1" />
+  <style>
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #111827;
+        color: #ffffff;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.1')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+
+            // Force update if new version available
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New version available, refresh the page
+                    if (confirm('A new version is available. Refresh to update?')) {
+                      window.location.reload();
+                    }
+                  }
                 });
               }
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
             });
-        });
-      }
 
-      // Install prompt for PWA
-      let deferredPrompt;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        
-        // Show install button or banner
-        const installBanner = document.createElement('div');
-        installBanner.innerHTML = `
+            // Register for background sync when online
+            if ('sync' in window.ServiceWorkerRegistration.prototype) {
+              window.addEventListener('online', () => {
+                registration.sync.register('background-sync-links');
+              });
+            }
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+
+    // Install prompt for PWA
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Show install button or banner
+      const installBanner = document.createElement('div');
+      installBanner.innerHTML = `
           <div style="position: fixed; top: 0; left: 0; right: 0; background: #3B82F6; color: white; padding: 12px; text-align: center; z-index: 1000;">
             <span>Install LinkVault for offline access</span>
             <button id="install-btn" style="margin-left: 12px; background: white; color: #3B82F6; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Install</button>
             <button id="dismiss-btn" style="margin-left: 8px; background: transparent; color: white; border: 1px solid white; padding: 6px 12px; border-radius: 4px; cursor: pointer;">Dismiss</button>
           </div>
         `;
-        document.body.appendChild(installBanner);
-        
-        document.getElementById('install-btn').addEventListener('click', () => {
-          deferredPrompt.prompt();
-          deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-              console.log('User accepted the install prompt');
-            }
-            deferredPrompt = null;
-            document.body.removeChild(installBanner);
-          });
-        });
-        
-        document.getElementById('dismiss-btn').addEventListener('click', () => {
+      document.body.appendChild(installBanner);
+
+      document.getElementById('install-btn').addEventListener('click', () => {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          }
+          deferredPrompt = null;
           document.body.removeChild(installBanner);
         });
       });
-    </script>
-  </body>
+
+      document.getElementById('dismiss-btn').addEventListener('click', () => {
+        document.body.removeChild(installBanner);
+      });
+    });
+  </script>
+</body>
+
 </html>

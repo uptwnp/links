@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /
+
+# Block all search engines from indexing this site
+# This is a personal link manager application
+Crawl-delay: 86400
