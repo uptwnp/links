@@ -1,84 +1,87 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#3B82F6" />
-    <meta name="description" content="A beautiful, offline-capable link manager for organizing your bookmarks" />
-    <meta name="version" content="1.0.1" />
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="LinkVault">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="msapplication-TileColor" content="#3B82F6">
-    <meta name="msapplication-config" content="/browserconfig.xml">
-    <title>LinkVault - Personal Link Manager</title>
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <style>
-      .line-clamp-2 {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-      
-      @media (prefers-color-scheme: dark) {
-        body {
-          background-color: #111827;
-          color: #ffffff;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js?v=1.0.1')
-            .then((registration) => {
-              console.log('SW registered: ', registration);
-              
-              // Force update if new version available
-              registration.addEventListener('updatefound', () => {
-                const newWorker = registration.installing;
-                if (newWorker) {
-                  newWorker.addEventListener('statechange', () => {
-                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                      // New version available, refresh the page
-                      if (confirm('A new version is available. Refresh to update?')) {
-                        window.location.reload();
-                      }
-                    }
-                  });
-                }
-              });
 
-              // Register for background sync when online
-              if ('sync' in window.ServiceWorkerRegistration.prototype) {
-                window.addEventListener('online', () => {
-                  registration.sync.register('background-sync-links');
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#3B82F6" />
+  <meta name="description" content="A beautiful, offline-capable link manager for organizing your bookmarks" />
+  <meta name="version" content="1.0.1" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="LinkVault">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="msapplication-TileColor" content="#3B82F6">
+  <meta name="msapplication-config" content="/browserconfig.xml">
+  <title>LinkVault</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <style>
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #111827;
+        color: #ffffff;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js?v=1.0.1')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+
+            // Force update if new version available
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    // New version available, refresh the page
+                    if (confirm('A new version is available. Refresh to update?')) {
+                      window.location.reload();
+                    }
+                  }
                 });
               }
-            })
-            .catch((registrationError) => {
-              console.log('SW registration failed: ', registrationError);
             });
-        });
-      }
 
-      // Install prompt for PWA
-      let deferredPrompt;
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        // Let React handle the install prompt
+            // Register for background sync when online
+            if ('sync' in window.ServiceWorkerRegistration.prototype) {
+              window.addEventListener('online', () => {
+                registration.sync.register('background-sync-links');
+              });
+            }
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
       });
-    </script>
-  </body>
+    }
+
+    // Install prompt for PWA
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      // Let React handle the install prompt
+    });
+  </script>
+</body>
+
 </html>
