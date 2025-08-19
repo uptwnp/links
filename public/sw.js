@@ -258,3 +258,28 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification('LinkVault', options)
   );
 });
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  console.log('Service Worker: Notification clicked');
+  event.notification.close();
+  
+  event.waitUntil(
+    clients.openWindow('/')
+  );
+});
+
+// Handle app shortcuts
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SHORTCUT_ACTION') {
+    // Forward shortcut actions to all clients
+    self.clients.matchAll().then(clients => {
+      clients.forEach(client => {
+        client.postMessage({
+          type: 'SHORTCUT_ACTION',
+          action: event.data.action
+        });
+      });
+    });
+  }
+});

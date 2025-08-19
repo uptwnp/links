@@ -39,6 +39,19 @@ function App() {
   const [copySuccess, setCopySuccess] = useState(false);
   const { saveSettings, loadSettings } = useAppSettings();
   const { lastFetched } = useLinkCache();
+  
+  // Handle shortcut events
+  useEffect(() => {
+    const handleShortcutAddLink = () => {
+      setShowAddModal(true);
+    };
+    
+    window.addEventListener('shortcut-add-link', handleShortcutAddLink);
+    
+    return () => {
+      window.removeEventListener('shortcut-add-link', handleShortcutAddLink);
+    };
+  }, []);
 
   // Load settings on mount
   useEffect(() => {

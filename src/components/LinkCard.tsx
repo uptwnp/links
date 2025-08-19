@@ -34,12 +34,8 @@ export function LinkCard({
   const linkTags = tags.filter(tag => link.tags.includes(tag.name));
 
   const handleClick = (e: React.MouseEvent) => {
-    // Then open the link
-    if (e.ctrlKey || e.metaKey) {
-      onOpenLink(link.url, true);
-    } else {
-      onOpenLink(link.url, true);
-    }
+    // Always open links in new tab/window
+    onOpenLink(link.url, true);
     
     // Increment click count after opening (non-blocking)
     onLinkClick(link.id);
