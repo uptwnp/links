@@ -1,16 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Folder, ExternalLink, Tag, ChevronDown, ChevronUp, Star, SortAsc, SortDesc, Clock, TrendingUp, RefreshCw, AlertCircle, Copy, Check } from 'lucide-react';
-import { LinkManager } from './components/LinkManager';
-import { AddLinkModal } from './components/AddLinkModal';
-import { EditLinkModal } from './components/EditLinkModal';
-import { Link, Folder as FolderType, Tag as TagType } from './types/index';
-import { useApi } from './hooks/useApi';
-import { useAppSettings } from './hooks/useAppSettings';
-import { useLinkCache } from './hooks/useLinkCache';
-import { cn } from './utils/cn';
-import { APP_VERSION, BUILD_TIMESTAMP } from './config/version';
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Search,
+  Folder,
+  ExternalLink,
+  Tag,
+  ChevronDown,
+  ChevronUp,
+  Star,
+  SortAsc,
+  SortDesc,
+  Clock,
+  TrendingUp,
+  RefreshCw,
+  AlertCircle,
+  Copy,
+  Check,
+} from "lucide-react";
+import { LinkManager } from "./components/LinkManager";
+import { AddLinkModal } from "./components/AddLinkModal";
+import { EditLinkModal } from "./components/EditLinkModal";
+import { Link, Folder as FolderType, Tag as TagType } from "./types/index";
+import { useApi } from "./hooks/useApi";
+import { useAppSettings } from "./hooks/useAppSettings";
+import { useLinkCache } from "./hooks/useLinkCache";
+import { useOfflineStatus } from "./hooks/useOfflineStatus";
+import { cn } from "./utils/cn";
+import { APP_VERSION, BUILD_TIMESTAMP } from "./config/version";
 
-type SortOption = 'newest' | 'oldest' | 'mostUsed';
+type SortOption = "newest" | "oldest" | "mostUsed";
 
 function App() {
   const {
@@ -26,14 +44,14 @@ function App() {
     refreshLinks,
   } = useApi();
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedFolder, setSelectedFolder] = useState<string>('');
+  const [selectedFolder, setSelectedFolder] = useState<string>("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showFolders, setShowFolders] = useState(false);
   const [showTags, setShowTags] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
   const [editingLink, setEditingLink] = useState<Link | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -41,18 +59,22 @@ function App() {
   const { lastFetched } = useLinkCache();
   const [installPrompt, setInstallPrompt] = useState<any>(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
-  const { isOnline: isOnlineStatus, updateAvailable, installUpdate } = useOfflineStatus();
-  
+  const {
+    isOnline: isOnlineStatus,
+    updateAvailable,
+    installUpdate,
+  } = useOfflineStatus();
+
   // Handle shortcut events
   useEffect(() => {
     const handleShortcutAddLink = () => {
       setShowAddModal(true);
     };
-    
-    window.addEventListener('shortcut-add-link', handleShortcutAddLink);
-    
+
+    window.addEventListener("shortcut-add-link", handleShortcutAddLink);
+
     return () => {
-      window.removeEventListener('shortcut-add-link', handleShortcutAddLink);
+      window.removeEventListener("shortcut-add-link", handleShortcutAddLink);
     };
   }, []);
 
@@ -69,19 +91,22 @@ function App() {
       setShowInstallBanner(false);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
   // Handle URL parameters for shortcuts
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('action') === 'add') {
+    if (urlParams.get("action") === "add") {
       setShowAddModal(true);
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -92,7 +117,7 @@ function App() {
     if (installPrompt) {
       installPrompt.prompt();
       const { outcome } = await installPrompt.userChoice;
-      if (outcome === 'accepted') {
+      if (outcome === "accepted") {
         setInstallPrompt(null);
         setShowInstallBanner(false);
       }
@@ -103,13 +128,13 @@ function App() {
   useEffect(() => {
     const savedSettings = loadSettings();
     if (savedSettings) {
-      setSearchTerm(savedSettings.searchTerm || '');
+      setSearchTerm(savedSettings.searchTerm || "");
       setSelectedTags(savedSettings.selectedTags || []);
-      setSelectedFolder(savedSettings.selectedFolder || '');
+      setSelectedFolder(savedSettings.selectedFolder || "");
       setShowFolders(savedSettings.showFolders || false);
       setShowTags(savedSettings.showTags || false);
       setShowFavorites(savedSettings.showFavorites || false);
-      setSortBy(savedSettings.sortBy || 'newest');
+      setSortBy(savedSettings.sortBy || "newest");
     }
   }, [loadSettings]);
 
@@ -125,34 +150,51 @@ function App() {
       sortBy,
     };
     saveSettings(settings);
-  }, [searchTerm, selectedTags, selectedFolder, showFolders, showTags, showFavorites, sortBy, saveSettings]);
+  }, [
+    searchTerm,
+    selectedTags,
+    selectedFolder,
+    showFolders,
+    showTags,
+    showFavorites,
+    sortBy,
+    saveSettings,
+  ]);
 
-  const filteredLinks = links.filter(link => {
-    const matchesSearch = link.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         link.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         link.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTags = selectedTags.length === 0 || 
-                       selectedTags.some(tag => link.tags.includes(tag));
+  const filteredLinks = links.filter((link) => {
+    const matchesSearch =
+      link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      link.url.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      link.description.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTags =
+      selectedTags.length === 0 ||
+      selectedTags.some((tag) => link.tags.includes(tag));
     const matchesFolder = !selectedFolder || link.folderId === selectedFolder;
     const matchesFavorites = !showFavorites || link.isFavorite;
-    
+
     return matchesSearch && matchesTags && matchesFolder && matchesFavorites;
   });
 
   const sortedLinks = [...filteredLinks].sort((a, b) => {
     switch (sortBy) {
-      case 'newest':
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      case 'oldest':
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      case 'mostUsed':
+      case "newest":
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      case "oldest":
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      case "mostUsed":
         return (b.clickCount || 0) - (a.clickCount || 0);
       default:
         return 0;
     }
   });
 
-  const handleAddLink = async (newLink: Omit<Link, 'id' | 'createdAt' | 'clickCount'>) => {
+  const handleAddLink = async (
+    newLink: Omit<Link, "id" | "createdAt" | "clickCount">
+  ) => {
     setIsSubmitting(true);
     try {
       const success = await apiAddLink(newLink);
@@ -176,7 +218,7 @@ function App() {
   const handleEditLink = async (linkId: string, updatedLink: Partial<Link>) => {
     if (Object.keys(updatedLink).length === 0) {
       // Open edit modal
-      const linkToEdit = links.find(link => link.id === linkId);
+      const linkToEdit = links.find((link) => link.id === linkId);
       if (linkToEdit) {
         setEditingLink(linkToEdit);
       }
@@ -202,7 +244,7 @@ function App() {
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
-      console.error('Failed to copy link:', err);
+      console.error("Failed to copy link:", err);
     }
   };
 
@@ -212,20 +254,20 @@ function App() {
 
   const handleAddFolder = (name: string) => {
     // Folders are now managed by the API based on link data
-    console.log('Folder creation is handled automatically when adding links');
+    console.log("Folder creation is handled automatically when adding links");
   };
 
   const handleDeleteFolder = (folderId: string) => {
     // Update all links in this folder to have no folder
-    const linksInFolder = links.filter(link => link.folderId === folderId);
-    linksInFolder.forEach(link => {
-      handleEditLink(link.id, { folderId: '' });
+    const linksInFolder = links.filter((link) => link.folderId === folderId);
+    linksInFolder.forEach((link) => {
+      handleEditLink(link.id, { folderId: "" });
     });
   };
 
   const toggleFolder = (folderId: string) => {
     // This is now handled locally in state since it's just UI
-    console.log('Toggle folder:', folderId);
+    console.log("Toggle folder:", folderId);
   };
 
   if (isLoading) {
@@ -244,7 +286,9 @@ function App() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Connection Error</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Connection Error
+          </h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={refreshLinks}
@@ -270,7 +314,9 @@ function App() {
               </div>
               <div>
                 <p className="font-medium text-sm">Install LinkVault</p>
-                <p className="text-xs opacity-90">Get quick access and offline functionality</p>
+                <p className="text-xs opacity-90">
+                  Get quick access and offline functionality
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -297,7 +343,9 @@ function App() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-sm">Update Available</p>
-              <p className="text-xs opacity-90">A new version is ready to install</p>
+              <p className="text-xs opacity-90">
+                A new version is ready to install
+              </p>
             </div>
             <button
               onClick={installUpdate}
@@ -310,7 +358,12 @@ function App() {
       )}
 
       {/* Main Content */}
-      <main className={cn("px-2 sm:px-4 lg:px-4 py-8", showInstallBanner && "pt-20")}>
+      <main
+        className={cn(
+          "px-2 sm:px-4 lg:px-4 py-8",
+          showInstallBanner && "pt-20"
+        )}
+      >
         {/* Search and Controls - Single Row */}
         <div className="mb-8">
           <div className="flex gap-2 sm:gap-4 items-center w-full">
@@ -328,20 +381,23 @@ function App() {
 
             {/* Controls */}
             <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-
               {/* Folders Toggle */}
               <button
                 onClick={() => setShowFolders(!showFolders)}
                 className={cn(
                   "flex items-center space-x-1 px-2 sm:px-3 py-2 rounded-lg transition-colors border text-xs sm:text-sm",
-                  showFolders 
-                    ? "bg-blue-600 text-white border-blue-600" 
+                  showFolders
+                    ? "bg-blue-600 text-white border-blue-600"
                     : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
                 )}
               >
                 <Folder className="w-4 h-4" />
                 <span className="hidden sm:inline">
-                  {showFolders ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {showFolders ? (
+                    <ChevronUp className="w-3 h-3" />
+                  ) : (
+                    <ChevronDown className="w-3 h-3" />
+                  )}
                 </span>
               </button>
 
@@ -350,14 +406,18 @@ function App() {
                 onClick={() => setShowTags(!showTags)}
                 className={cn(
                   "flex items-center space-x-1 px-2 sm:px-3 py-2 rounded-lg transition-colors border text-xs sm:text-sm",
-                  showTags 
-                    ? "bg-green-600 text-white border-green-600" 
+                  showTags
+                    ? "bg-green-600 text-white border-green-600"
                     : "bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                 )}
               >
                 <Tag className="w-4 h-4" />
                 <span className="hidden sm:inline">
-                  {showTags ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {showTags ? (
+                    <ChevronUp className="w-3 h-3" />
+                  ) : (
+                    <ChevronDown className="w-3 h-3" />
+                  )}
                 </span>
               </button>
 
@@ -366,19 +426,21 @@ function App() {
                 onClick={() => setShowFavorites(!showFavorites)}
                 className={cn(
                   "flex items-center px-2 sm:px-3 py-2 rounded-lg transition-colors border text-xs sm:text-sm",
-                  showFavorites 
-                    ? "bg-yellow-500 text-white border-yellow-500" 
+                  showFavorites
+                    ? "bg-yellow-500 text-white border-yellow-500"
                     : "bg-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100"
                 )}
               >
-                <Star className={cn("w-4 h-4", showFavorites && "fill-current")} />
+                <Star
+                  className={cn("w-4 h-4", showFavorites && "fill-current")}
+                />
               </button>
-              
+
               {/* Clear Filters */}
               {(selectedFolder || selectedTags.length > 0 || showFavorites) && (
                 <button
                   onClick={() => {
-                    setSelectedFolder('');
+                    setSelectedFolder("");
                     setSelectedTags([]);
                     setShowFavorites(false);
                   }}
@@ -399,7 +461,7 @@ function App() {
                 <h2 className="text-lg font-semibold text-gray-900">Folders</h2>
                 <button
                   onClick={() => {
-                    const name = prompt('Enter folder name:');
+                    const name = prompt("Enter folder name:");
                     if (name) handleAddFolder(name);
                   }}
                   className="text-blue-600 hover:text-blue-700 transition-colors"
@@ -408,29 +470,29 @@ function App() {
                 </button>
               </div>
             </div>
-            
+
             <div className="p-4">
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setSelectedFolder('')}
+                  onClick={() => setSelectedFolder("")}
                   className={cn(
                     "px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border",
-                    selectedFolder === '' 
-                      ? "bg-blue-600 text-white border-blue-600" 
+                    selectedFolder === ""
+                      ? "bg-blue-600 text-white border-blue-600"
                       : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300"
                   )}
                 >
                   All Links ({links.length})
                 </button>
-                
-                {folders.map(folder => (
+
+                {folders.map((folder) => (
                   <button
                     key={folder.id}
                     onClick={() => setSelectedFolder(folder.id)}
                     className={cn(
                       "px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors border flex items-center space-x-1 sm:space-x-2",
-                      selectedFolder === folder.id 
-                        ? "bg-blue-600 text-white border-blue-600" 
+                      selectedFolder === folder.id
+                        ? "bg-blue-600 text-white border-blue-600"
                         : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50 hover:border-blue-300"
                     )}
                   >
@@ -440,7 +502,7 @@ function App() {
                     />
                     <span>{folder.name}</span>
                     <span className="text-xs opacity-75">
-                      ({links.filter(l => l.folderId === folder.id).length})
+                      ({links.filter((l) => l.folderId === folder.id).length})
                     </span>
                   </button>
                 ))}
@@ -457,13 +519,13 @@ function App() {
             </div>
             <div className="p-4">
               <div className="flex flex-wrap gap-2">
-                {tags.map(tag => (
+                {tags.map((tag) => (
                   <button
                     key={tag.id}
                     onClick={() => {
-                      setSelectedTags(prev => 
-                        prev.includes(tag.name) 
-                          ? prev.filter(t => t !== tag.name)
+                      setSelectedTags((prev) =>
+                        prev.includes(tag.name)
+                          ? prev.filter((t) => t !== tag.name)
                           : [...prev, tag.name]
                       );
                     }}
@@ -486,41 +548,43 @@ function App() {
         <div className="bg-white rounded-xl  shadow-sm max-w-7xl mx-auto">
           <div className="">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
-            <div className="flex items-center justify-between w-full">
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {filteredLinks.length} {filteredLinks.length === 1 ? 'Link' : 'Links'}
-                </h2>
-                <div className="text-xs text-gray-500">
-                  {selectedFolder && (
-                    <span>in {folders.find(f => f.id === selectedFolder)?.name} • </span>
-                  )}
-                  {selectedTags.length > 0 && (
-                    <span>tagged: {selectedTags.join(', ')} • </span>
-                  )}
-                  {showFavorites && (
-                    <span>favorites only</span>
-                  )}
+              <div className="flex items-center justify-between w-full">
+                <div className="flex-1">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    {filteredLinks.length}{" "}
+                    {filteredLinks.length === 1 ? "Link" : "Links"}
+                  </h2>
+                  <div className="text-xs text-gray-500">
+                    {selectedFolder && (
+                      <span>
+                        in {folders.find((f) => f.id === selectedFolder)?.name}{" "}
+                        •{" "}
+                      </span>
+                    )}
+                    {selectedTags.length > 0 && (
+                      <span>tagged: {selectedTags.join(", ")} • </span>
+                    )}
+                    {showFavorites && <span>favorites only</span>}
+                  </div>
+                </div>
+
+                {/* Sort Options */}
+                <div className="relative flex-shrink-0">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                    className="appearance-none bg-white border border-gray-300 rounded-lg px-2 py-1.5 pr-6 text-xs text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0"
+                  >
+                    <option value="newest">Newest</option>
+                    <option value="oldest">Oldest</option>
+                    <option value="mostUsed">Most Used</option>
+                  </select>
+                  <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
                 </div>
               </div>
-              
-              {/* Sort Options */}
-              <div className="relative flex-shrink-0">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as SortOption)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-2 py-1.5 pr-6 text-xs text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-w-0"
-                >
-                  <option value="newest">Newest</option>
-                  <option value="oldest">Oldest</option>
-                  <option value="mostUsed">Most Used</option>
-                </select>
-                <ChevronDown className="absolute right-1 top-1/2 transform -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
-              </div>
-            </div>
             </div>
           </div>
-          
+
           <div className="mt-4">
             <LinkManager
               links={sortedLinks}
@@ -546,7 +610,9 @@ function App() {
             <div className="flex items-center space-x-4">
               <span>v{APP_VERSION}</span>
               {lastFetched && (
-                <span>Last updated: {new Date(lastFetched).toLocaleString()}</span>
+                <span>
+                  Last updated: {new Date(lastFetched).toLocaleString()}
+                </span>
               )}
             </div>
           </div>
@@ -556,7 +622,12 @@ function App() {
               disabled={isLoading}
               className="flex items-center space-x-1 px-3 py-1.5 text-xs sm:text-sm bg-blue-50 text-blue-700 border border-blue-200 rounded-lg hover:bg-blue-100 disabled:opacity-50 transition-colors"
             >
-              <RefreshCw className={cn("w-3 h-3 sm:w-4 sm:h-4", isLoading && "animate-spin")} />
+              <RefreshCw
+                className={cn(
+                  "w-3 h-3 sm:w-4 sm:h-4",
+                  isLoading && "animate-spin"
+                )}
+              />
               <span>Refresh Data</span>
             </button>
           </div>
@@ -586,7 +657,7 @@ function App() {
           tags={tags}
           onClose={() => setShowAddModal(false)}
           onAddLink={handleAddLink}
-          existingTags={tags.map(tag => tag.name)}
+          existingTags={tags.map((tag) => tag.name)}
           isSubmitting={isSubmitting}
         />
       )}
@@ -605,11 +676,10 @@ function App() {
             await handleDeleteLink(editingLink.id);
             setEditingLink(null);
           }}
-          existingTags={tags.map(tag => tag.name)}
+          existingTags={tags.map((tag) => tag.name)}
           isSubmitting={isSubmitting}
         />
       )}
-
     </div>
   );
 }
