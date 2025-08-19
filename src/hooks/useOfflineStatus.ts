@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 export function useOfflineStatus() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [wasOffline, setWasOffline] = useState(false);
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -37,6 +38,8 @@ export function useOfflineStatus() {
         console.log('App: Background sync completed, refreshing data');
         // Trigger a data refresh in the app
         window.dispatchEvent(new CustomEvent('background-sync-success'));
+      } else if (event.data?.type === 'UPDATE_AVAILABLE') {
+        setUpdateAvailable(true);
       }
     };
 
@@ -54,5 +57,12 @@ export function useOfflineStatus() {
     };
   }, [wasOffline]);
 
-  return { isOnline, wasOffline };
+  const installUpdate = () => {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+      window.location.reload();
+    }
+  };
+
+  return { isOnline, wasOffline, updateAvailable, installUpdate };
 }

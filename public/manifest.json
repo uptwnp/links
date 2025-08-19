@@ -4,16 +4,46 @@
   "description": "A beautiful, offline-capable link manager for organizing your bookmarks",
   "start_url": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
   "background_color": "#ffffff",
   "theme_color": "#3B82F6",
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "16x16 32x32"
+    },
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/icon-192-maskable.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512-maskable.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Add Link",
@@ -22,65 +52,10 @@
       "url": "/?action=add",
       "icons": [
         {
-          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%2306B6D4'/%3E%3Cpath d='M24 48h48M48 24v48' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
+          "src": "/icon-192.png",
+          "sizes": "192x192"
         }
       ]
-    }
-  ],
-  "categories": ["productivity", "utilities", "lifestyle"],
-  "screenshots": [
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'%3E%3Crect width='540' height='720' fill='%23f8fafc'/%3E%3Crect x='20' y='60' width='500' height='80' rx='12' fill='%233B82F6'/%3E%3Ctext x='270' y='110' text-anchor='middle' fill='white' font-size='24' font-family='system-ui'%3ELinkVault%3C/text%3E%3Crect x='20' y='160' width='500' height='60' rx='8' fill='white' stroke='%23e2e8f0'/%3E%3Crect x='20' y='240' width='500' height='60' rx='8' fill='white' stroke='%23e2e8f0'/%3E%3Crect x='20' y='320' width='500' height='60' rx='8' fill='white' stroke='%23e2e8f0'/%3E%3C/svg%3E",
-      "sizes": "540x720",
-      "type": "image/svg+xml",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1024 768'%3E%3Crect width='1024' height='768' fill='%23f8fafc'/%3E%3Crect x='40' y='40' width='944' height='80' rx='12' fill='%233B82F6'/%3E%3Ctext x='512' y='90' text-anchor='middle' fill='white' font-size='32' font-family='system-ui'%3ELinkVault - Desktop%3C/text%3E%3Crect x='40' y='140' width='460' height='80' rx='8' fill='white' stroke='%23e2e8f0'/%3E%3Crect x='524' y='140' width='460' height='80' rx='8' fill='white' stroke='%23e2e8f0'/%3E%3C/svg%3E",
-      "sizes": "1024x768",
-      "type": "image/svg+xml",
-      "form_factor": "wide"
-    }
-  ],
-  "icons": [
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' fill='%233B82F6'/%3E%3Cpath d='M12 24h24M24 12v24' stroke='white' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E",
-      "sizes": "48x48",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 72 72'%3E%3Crect width='72' height='72' fill='%233B82F6'/%3E%3Cpath d='M18 36h36M36 18v36' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E",
-      "sizes": "72x72",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Crect width='96' height='96' fill='%233B82F6'/%3E%3Cpath d='M24 48h48M48 24v48' stroke='white' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E",
-      "sizes": "96x96",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Crect width='144' height='144' fill='%233B82F6'/%3E%3Cpath d='M36 72h72M72 36v72' stroke='white' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E",
-      "sizes": "144x144",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%233B82F6'/%3E%3Cpath d='M48 96h96M96 48v96' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E",
-      "sizes": "192x192",
-      "type": "image/svg+xml",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 384'%3E%3Crect width='384' height='384' fill='%233B82F6'/%3E%3Cpath d='M96 192h192M192 96v192' stroke='white' stroke-width='12' stroke-linecap='round'/%3E%3C/svg%3E",
-      "sizes": "384x384",
-      "type": "image/svg+xml"
-    },
-    {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%233B82F6'/%3E%3Cpath d='M128 256h256M256 128v256' stroke='white' stroke-width='16' stroke-linecap='round'/%3E%3C/svg%3E",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
-      "purpose": "maskable any"
     }
   ]
 }

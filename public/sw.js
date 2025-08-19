@@ -1,31 +1,46 @@
 const CACHE_NAME = 'linkvault-v1.0.1';
 const STATIC_CACHE = 'linkvault-static-v1.0.1';
 const DYNAMIC_CACHE = 'linkvault-dynamic-v1.0.1';
+const API_CACHE = 'linkvault-api-v1.0.1';
 
 // Static assets to cache immediately
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/favicon.svg'
+  '/favicon.svg',
+  '/favicon.ico',
+  '/apple-touch-icon.png',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/icon-192-maskable.png',
+  '/icon-512-maskable.png',
+  '/browserconfig.xml'
 ];
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
   console.log('Service Worker: Installing...');
+  
+  // Skip waiting to activate immediately
+  self.skipWaiting();
+  
   event.waitUntil(
     Promise.all([
       caches.open(STATIC_CACHE).then(cache => {
         console.log('Service Worker: Caching static assets');
         return cache.addAll(STATIC_ASSETS);
       }),
-      caches.open(DYNAMIC_CACHE).then(cache => {
+      caches.open(DYNAMIC_CACHE).then(() => {
         console.log('Service Worker: Dynamic cache ready');
+        return Promise.resolve();
+      }),
+      caches.open(API_CACHE).then(() => {
+        console.log('Service Worker: API cache ready');
         return Promise.resolve();
       })
     ]).then(() => {
       console.log('Service Worker: Installation complete');
-      return self.skipWaiting();
     })
   );
 });
@@ -33,21 +48,35 @@ self.addEventListener('install', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('Service Worker: Activating...');
+  
+  // Take control of all clients immediately
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== STATIC_CACHE && 
-              cacheName !== DYNAMIC_CACHE && 
-              cacheName !== CACHE_NAME) {
-            console.log('Service Worker: Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
+    Promise.all([
+      // Clean up old caches
+      caches.keys().then(cacheNames => {
+        return Promise.all(
+          cacheNames.map(cacheName => {
+            if (cacheName !== STATIC_CACHE && 
+                cacheName !== DYNAMIC_CACHE && 
+                cacheName !== API_CACHE &&
+                cacheName !== CACHE_NAME) {
+              console.log('Service Worker: Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      }),
+      // Take control of clients
+      self.clients.claim()
+    ]).then(() => {
       console.log('Service Worker: Activation complete');
-      return self.clients.claim();
+      
+      // Notify clients that update is available
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({ type: 'UPDATE_AVAILABLE' });
+        });
+      });
     })
   );
 });
@@ -90,7 +119,7 @@ async function handleApiRequest(request) {
     if (networkResponse.ok) {
       // Cache successful API responses (only GET requests)
       if (request.method === 'GET') {
-        const cache = await caches.open(DYNAMIC_CACHE);
+        const cache = await caches.open(API_CACHE);
         cache.put(request, networkResponse.clone());
         console.log('Service Worker: Cached API response');
       }
@@ -206,7 +235,7 @@ async function syncLinks() {
     
     if (response.ok) {
       // Cache the fresh data
-      const cache = await caches.open(DYNAMIC_CACHE);
+      const cache = await caches.open(API_CACHE);
       cache.put('https://prop.digiheadway.in/api/mylinks.php?action=get', response.clone());
       
       // Notify clients that fresh data is available
@@ -257,29 +286,4 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification('LinkVault', options)
   );
-});
-
-// Handle notification clicks
-self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification clicked');
-  event.notification.close();
-  
-  event.waitUntil(
-    clients.openWindow('/')
-  );
-});
-
-// Handle app shortcuts
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SHORTCUT_ACTION') {
-    // Forward shortcut actions to all clients
-    self.clients.matchAll().then(clients => {
-      clients.forEach(client => {
-        client.postMessage({
-          type: 'SHORTCUT_ACTION',
-          action: event.data.action
-        });
-      });
-    });
-  }
 });

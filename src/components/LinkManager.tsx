@@ -49,14 +49,7 @@ export function LinkManager({
 
   const handleOpenLink = (url: string, newTab = true) => {
     if (newTab) {
-      // Force opening in system browser for PWA
-      if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
-        // In PWA mode, use location.href to open in system browser
-        window.location.href = url;
-      } else {
-        // In regular browser, open in new tab
-        window.open(url, '_blank', 'noopener,noreferrer');
-      }
+      window.open(url, '_blank', 'noopener,noreferrer');
     } else {
       window.location.href = url;
     }

@@ -57,9 +57,9 @@ export function ContextMenu({
   const menuItems = [
     {
       icon: ExternalLink,
-      label: 'Open link',
+      label: 'Open in new tab',
       action: () => onOpenLink(link.url, true),
-      shortcut: ''
+      shortcut: 'Ctrl+Click'
     },
     {
       icon: Copy,

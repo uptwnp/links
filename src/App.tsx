@@ -39,6 +39,9 @@ function App() {
   const [copySuccess, setCopySuccess] = useState(false);
   const { saveSettings, loadSettings } = useAppSettings();
   const { lastFetched } = useLinkCache();
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const { isOnline: isOnlineStatus, updateAvailable, installUpdate } = useOfflineStatus();
   
   // Handle shortcut events
   useEffect(() => {
@@ -52,6 +55,49 @@ function App() {
       window.removeEventListener('shortcut-add-link', handleShortcutAddLink);
     };
   }, []);
+
+  // Handle PWA install prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: any) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstallBanner(true);
+    };
+
+    const handleAppInstalled = () => {
+      setInstallPrompt(null);
+      setShowInstallBanner(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  // Handle URL parameters for shortcuts
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('action') === 'add') {
+      setShowAddModal(true);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setInstallPrompt(null);
+        setShowInstallBanner(false);
+      }
+    }
+  };
 
   // Load settings on mount
   useEffect(() => {
@@ -214,8 +260,57 @@ function App() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
+      {/* PWA Install Banner */}
+      {showInstallBanner && (
+        <div className="fixed top-0 left-0 right-0 bg-blue-600 text-white px-4 py-3 z-50 shadow-lg">
+          <div className="flex items-center justify-between max-w-7xl mx-auto">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                <Plus className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-medium text-sm">Install LinkVault</p>
+                <p className="text-xs opacity-90">Get quick access and offline functionality</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handleInstallApp}
+                className="px-4 py-2 bg-white text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors"
+              >
+                Install
+              </button>
+              <button
+                onClick={() => setShowInstallBanner(false)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Available Banner */}
+      {updateAvailable && (
+        <div className="fixed bottom-6 left-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-50 max-w-md mx-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-medium text-sm">Update Available</p>
+              <p className="text-xs opacity-90">A new version is ready to install</p>
+            </div>
+            <button
+              onClick={installUpdate}
+              className="px-3 py-1 bg-white text-green-600 rounded text-sm font-medium hover:bg-green-50 transition-colors"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
-      <main className="px-2 sm:px-4 lg:px-4 py-8">
+      <main className={cn("px-2 sm:px-4 lg:px-4 py-8", showInstallBanner && "pt-20")}>
         {/* Search and Controls - Single Row */}
         <div className="mb-8">
           <div className="flex gap-2 sm:gap-4 items-center w-full">
