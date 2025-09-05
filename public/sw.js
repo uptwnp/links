@@ -1,7 +1,8 @@
-const CACHE_NAME = 'linkvault-v1.0.1';
-const STATIC_CACHE = 'linkvault-static-v1.0.1';
-const DYNAMIC_CACHE = 'linkvault-dynamic-v1.0.1';
-const API_CACHE = 'linkvault-api-v1.0.1';
+const CACHE_NAME = 'linkvault-v1.0.2';
+const STATIC_CACHE = 'linkvault-static-v1.0.2';
+const DYNAMIC_CACHE = 'linkvault-dynamic-v1.0.2';
+const API_CACHE = 'linkvault-api-v1.0.2';
+const RUNTIME_CACHE = 'linkvault-runtime-v1.0.2';
 
 // Static assets to cache immediately
 const STATIC_ASSETS = [
@@ -16,6 +17,12 @@ const STATIC_ASSETS = [
   '/icon-192-maskable.png',
   '/icon-512-maskable.png',
   '/browserconfig.xml'
+];
+
+// Critical resources to preload
+const CRITICAL_RESOURCES = [
+  '/manifest.json',
+  '/favicon.svg'
 ];
 
 // Install event - cache static assets
@@ -38,6 +45,10 @@ self.addEventListener('install', (event) => {
       caches.open(API_CACHE).then(() => {
         console.log('Service Worker: API cache ready');
         return Promise.resolve();
+      }),
+      caches.open(RUNTIME_CACHE).then(() => {
+        console.log('Service Worker: Runtime cache ready');
+        return Promise.resolve();
       })
     ]).then(() => {
       console.log('Service Worker: Installation complete');
@@ -59,6 +70,7 @@ self.addEventListener('activate', (event) => {
             if (cacheName !== STATIC_CACHE && 
                 cacheName !== DYNAMIC_CACHE && 
                 cacheName !== API_CACHE &&
+                cacheName !== RUNTIME_CACHE &&
                 cacheName !== CACHE_NAME) {
               console.log('Service Worker: Deleting old cache:', cacheName);
               return caches.delete(cacheName);
@@ -97,10 +109,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle static assets
+  // Handle static assets with aggressive caching
   if (STATIC_ASSETS.some(asset => url.pathname === asset) || 
       url.pathname.startsWith('/assets/')) {
     event.respondWith(handleStaticAsset(request));
+    return;
+  }
+
+  // Handle critical resources with cache-first strategy
+  if (CRITICAL_RESOURCES.some(resource => url.pathname === resource)) {
+    event.respondWith(handleCriticalResource(request));
     return;
   }
 
@@ -150,6 +168,31 @@ async function handleApiRequest(request) {
         headers: { 'Content-Type': 'application/json' }
       }
     );
+  }
+}
+
+// Handle critical resources - cache first, never network
+async function handleCriticalResource(request) {
+  try {
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      console.log('Service Worker: Serving critical resource from cache');
+      return cachedResponse;
+    }
+
+    console.log('Service Worker: Critical resource not in cache, fetching from network');
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, networkResponse.clone());
+      console.log('Service Worker: Cached critical resource');
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.log('Service Worker: Failed to fetch critical resource');
+    return new Response('Critical resource not available', { status: 404 });
   }
 }
 

@@ -26,6 +26,7 @@ import { useApi } from "./hooks/useApi";
 import { useAppSettings } from "./hooks/useAppSettings";
 import { useLinkCache } from "./hooks/useLinkCache";
 import { useOfflineStatus } from "./hooks/useOfflineStatus";
+import { useAppShortcuts } from "./hooks/useAppShortcuts";
 import { cn } from "./utils/cn";
 import { APP_VERSION, BUILD_TIMESTAMP } from "./config/version";
 
@@ -65,6 +66,7 @@ function App() {
     updateAvailable,
     installUpdate,
   } = useOfflineStatus();
+  const { shortcutLinkId, clearShortcut } = useAppShortcuts(links);
 
   // Handle shortcut events
   useEffect(() => {
@@ -112,7 +114,30 @@ function App() {
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
+    
+    // Handle sort shortcut
+    const sortParam = urlParams.get("sort");
+    if (sortParam === "mostUsed") {
+      setSortBy("mostUsed");
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
+
+  // Handle shortcut link clicks
+  useEffect(() => {
+    if (shortcutLinkId) {
+      const link = links.find(l => l.id === shortcutLinkId);
+      if (link) {
+        // Open the link directly
+        window.open(link.url, '_blank');
+        // Increment click count
+        incrementClickCount(link.id);
+        // Clear the shortcut
+        clearShortcut();
+      }
+    }
+  }, [shortcutLinkId, links, incrementClickCount, clearShortcut]);
 
   const handleInstallApp = async () => {
     if (installPrompt) {

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#3B82F6" />
   <meta name="description" content="A beautiful, offline-capable link manager for organizing your bookmarks" />
-  <meta name="version" content="1.0.1" />
+  <meta name="version" content="1.0.2" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="LinkVault">
@@ -16,6 +16,16 @@
   <meta name="msapplication-TileColor" content="#3B82F6">
   <meta name="msapplication-config" content="/browserconfig.xml">
   <title>LinkVault</title>
+  
+  <!-- Preload critical resources -->
+  <link rel="preload" href="/manifest.json" as="fetch" crossorigin>
+  <link rel="preload" href="/favicon.svg" as="image" type="image/svg+xml">
+  <link rel="preload" href="/apple-touch-icon.png" as="image">
+  
+  <!-- DNS prefetch for external resources -->
+  <link rel="dns-prefetch" href="//prop.digiheadway.in">
+  
+  <!-- Manifest and icons -->
   <link rel="manifest" href="/manifest.json" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -42,7 +52,7 @@
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=1.0.1')
+        navigator.serviceWorker.register('/sw.js?v=1.0.2')
           .then((registration) => {
             console.log('SW registered: ', registration);
 

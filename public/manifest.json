@@ -56,6 +56,18 @@
           "sizes": "192x192"
         }
       ]
+    },
+    {
+      "name": "Most Used Links",
+      "short_name": "Popular",
+      "description": "View your most used links",
+      "url": "/?sort=mostUsed",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
